@@ -11,9 +11,9 @@ function pinger {
     return 0
 }
 
-echo "Local IP: " `ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'`
+echo "Local IP: " $(ip address show | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')
 
-GW=$(/sbin/route | awk '/default/ { print $2 }')
+GW=$(ip route show | grep 'default via' | sed 's/default via \([0-9.]*\).*/\1/')
 
 if [ $GW == "" ]; then
     echo "No default gateway specified."
