@@ -43,6 +43,18 @@ function is_interface_up() {
 	[[ -n "$interface_up" ]] && return 0 || return 1
 }
 
+function is_dhcp_client_running() {
+	local _interface=$1
+	[[ -z "$_interface" ]] && return 1
+	# Check for running dhcp clients
+	local dhcp_pid=$(pgrep '^(dhcp|dhclient)')
+	# Nothing found?
+	[[ -z "$dhcp_pid" ]] && return 1
+	# We found something, see if it's for this interface
+	grep -Qf "$_interface" /proc/$dhcp_pid/cmdline
+	return $?
+}
+
 interface="$1"
 # Assume eth0 if the user does not supply an interface name
 [[ -z "$interface" ]] && interface='eth0'
@@ -63,7 +75,7 @@ if [ -d "/sys/class/net/$DEV/wireless" ]; then
 fi
 
 IP=$(ip addr show $DEV | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')
-HAS_DHCP=$(ps -e | grep dhcp) # Search for DHCP daemons
+is_dhcp_client_running $DEV && HAS_DHCP='yes' || HAS_DHCP=''
 
 if [ -z IP ]; then
     echo "No IP address assigned to this computer."
