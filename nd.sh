@@ -55,12 +55,12 @@ function is_dhcp_client_running() {
 	return $?
 }
 
-interface="$1"
+DEV="$1"
 # Assume eth0 if the user does not supply an interface name
-[[ -z "$interface" ]] && interface='eth0'
+[[ -z "$DEV" ]] && DEV='eth0'
 
-is_link_up $interface && echo "* Link OK" || { echo "No link on $interface"; exit 1; }
-is_interface_up $interface && echo "* Interface is UP" || { echo "$interface is DOWN"; exit 1; }
+is_link_up $DEV && echo "* Link OK" || { echo "No link on $DEV"; exit 1; }
+is_interface_up $DEV && echo "* Interface is UP" || { echo "$DEV is DOWN"; exit 1; }
 
 # Is it a wireless device?
 if [ -d "/sys/class/net/$DEV/wireless" ]; then
