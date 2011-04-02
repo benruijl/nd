@@ -1,4 +1,19 @@
 #!/bin/bash
+#    nd - A network diagnostics utility for Linux
+#    Copyright (C) 2011 Ben Ruijl
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 TEST_EXT_IP="192.0.32.10" # IP used for testing if an external connection can be made
 TEST_HOST="example.com" # Test hostname used to check if DNS is working
@@ -39,7 +54,23 @@ if [ -d "/sys/class/net/$DEV/wireless" ]; then
     echo -e "\tAssociated to $ESSID"
 fi
 
-echo -e "\tLocal IP: $(ip addr show $DEV | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')"
+IP=$(ip addr show $DEV | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')
+HAS_DHCP=$(ps -e | grep dhcp) # Search for DHCP daemons
+
+if [ -z IP ]; then
+    echo "No IP address assigned to this computer."
+
+    if [ -z HAS_DHCP ]; then
+        echo -e "\tA DHCP daemon is running, however."
+    fi
+fi
+
+echo -e "\tLocal IP:$IP" 
+if [ -z HAS_DHCP ]; then
+    echo -e "\tDHCP: yes"
+else
+    echo -e "\tDHCP: no"
+fi
 
 GW=$(ip route show | grep 'default via' | sed 's/default via \([0-9.]*\).*/\1/')
 if [ $GW == "" ]; then
@@ -47,7 +78,12 @@ if [ $GW == "" ]; then
     exit 1
 fi
 
-echo "* Default gateway: $GW" 
+echo "* Default gateway: $GW"
+
+if [[ $(echo $IP | cut -d. -f1-3) != $(echo $GW | cut -d. -f1-3) ]]; then
+    echo "\tWarning: Local IP and gateways are not on the same subnet!"
+fi
+
 pinger $GW
 if [ $? -ne 0 ]; then
     echo "Could not ping default gateway."
