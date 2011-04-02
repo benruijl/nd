@@ -73,7 +73,7 @@ else
 fi
 
 GW=$(ip route show | grep 'default via' | sed 's/default via \([0-9.]*\).*/\1/')
-if [ $GW == "" ]; then
+if [ -z $GW ]; then
     echo "No default gateway specified."
     exit 1
 fi
@@ -81,7 +81,7 @@ fi
 echo "* Default gateway: $GW"
 
 if [[ $(echo $IP | cut -d. -f1-3) != $(echo $GW | cut -d. -f1-3) ]]; then
-    echo "\tWarning: Local IP and gateways are not on the same subnet!"
+    echo -e "\tWarning: Local IP and gateways are not on the same subnet!"
 fi
 
 pinger $GW
@@ -110,5 +110,6 @@ if [ $? -ne 0 ]; then
     echo "Could not look-up $TEST_HOST."
     exit 5
 fi
+echo -e "\tHostname was resolved."
 
 echo -e "\nYou seem to have a working internet connection!"
