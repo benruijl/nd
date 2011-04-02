@@ -77,16 +77,16 @@ fi
 IP=$(ip addr show $DEV | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')
 is_dhcp_client_running $DEV && HAS_DHCP='yes' || HAS_DHCP=''
 
-if [ -z IP ]; then
+if [ -z $IP ]; then
     echo "No IP address assigned to this computer."
 
-    if [ -z HAS_DHCP ]; then
+    if [ -z $HAS_DHCP ]; then
         echo -e "\tA DHCP daemon is running, however."
     fi
 fi
 
 echo -e "\tLocal IP:$IP" 
-if [ -z HAS_DHCP ]; then
+if [ -n "$HAS_DHCP" ]; then
     echo -e "\tDHCP: yes"
 else
     echo -e "\tDHCP: no"
