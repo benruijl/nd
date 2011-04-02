@@ -14,18 +14,26 @@ function pinger {
     return 0
 }
 
-# Check if a device is up
-# TODO: check for link/ether
-DEVCOUNT=$(ip addr | grep -c 'state UP')
-if [ $DEVCOUNT == 0 ]; then
-    echo "There are no network devices up."
-    exit 6
-fi
+function is_link_up() {
+	local _interface=$1
+	[[ -z "$_interface" ]] && return 1
+	interface_up=$(ip link show dev $_interface up | grep -F 'LOWER_UP')
+	[[ -n "$interface_up" ]] && return 0 || return 1
+}
 
-# Get the name of the first interface that is up
-# TODO: This is not necessarily the real internet device. Maybe do the following for all of them?
-DEV=$(ip addr | grep 'state UP' | cut -d: -f2 | cut -c2-)
-echo "* Active device: $DEV"
+function is_interface_up() {
+	local _interface=$1
+	[[ -z "$_interface" ]] && return 1
+	interface_up=$(ip link show dev $_interface up)
+	[[ -n "$interface_up" ]] && return 0 || return 1
+}
+
+interface="$1"
+# Assume eth0 if the user does not supply an interface name
+[[ -z "$interface" ]] && interface='eth0'
+
+is_link_up $interface && echo "* Link OK" || { echo "No link on $interface"; exit 1; }
+is_interface_up $interface && echo "* Interface is UP" || { echo "$interface is DOWN"; exit 1; }
 
 # Is it a wireless device?
 if [ -d "/sys/class/net/$DEV/wireless" ]; then
