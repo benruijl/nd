@@ -1,0 +1,10 @@
+nd - A network diagnostics utility for Linux
+
+DESCRIPTION
+    nd is a small utility that performs diagnostics on your network. It is useful to get a quick indication of where the problem lies.    
+
+USAGE
+    nd [interface]
+
+If no interface is specified, nd will pick the first interface with an ethernet link that is up. 
+

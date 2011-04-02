@@ -56,8 +56,8 @@ function is_dhcp_client_running() {
 }
 
 DEV="$1"
-# Assume eth0 if the user does not supply an interface name
-[[ -z "$DEV" ]] && DEV='eth0'
+# Get the first ethernet interface that is up if the user does not supply an interface name
+[[ -z "$DEV" ]] && DEV=$(ip link show up | grep -B1 'link/ether' | head -n1 | cut -d: -f2 | cut -c2-)
 
 is_link_up $DEV && echo "* Link OK" || { echo "No link on $DEV"; exit 1; }
 is_interface_up $DEV && echo "* Interface is UP" || { echo "$DEV is DOWN"; exit 1; }
