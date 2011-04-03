@@ -18,6 +18,9 @@
 TEST_EXT_IP="192.0.32.10" # IP used for testing if an external connection can be made
 TEST_HOST="example.com" # Test hostname used to check if DNS is working
 
+PATH="/sbin:/usr/sbin:/bin:/usr/bin"
+export PATH
+
 function pinger {
     PING=$(ping -c1 -n $1)
     if [ "$?" -ne "0" ]; then
@@ -58,6 +61,7 @@ function is_dhcp_client_running() {
 DEV="$1"
 # Get the first ethernet interface that is up if the user does not supply an interface name
 [[ -z "$DEV" ]] && DEV=$(ip link show up | grep -B1 'link/ether' | head -n1 | cut -d: -f2 | cut -c2-)
+[[ -z "$DEV" ]] && DEV="eth0"
 
 is_link_up $DEV && echo "* Link OK" || { echo "No link on $DEV"; exit 1; }
 is_interface_up $DEV && echo "* Interface is UP" || { echo "$DEV is DOWN"; exit 1; }
@@ -67,7 +71,7 @@ if [ -d "/sys/class/net/$DEV/wireless" ]; then
     ESSID=$(iwconfig wlan0 | grep ESSID | cut -d: -f2 |  sed 's/.*\"\([^\"]*\)".*/\1/')
 
     if [ -z $ESSID ]; then
-        echo "The wireless activated device $DEV is not associated to any access point"
+        echo "The wireless interface $DEV is not associated to any access point"
         exit 7
     fi
 
