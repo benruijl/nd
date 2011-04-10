@@ -70,7 +70,7 @@ is_interface_up $DEV && echo "* Interface is UP" || { echo "$DEV is DOWN"; exit 
 if [ -d "/sys/class/net/$DEV/wireless" ]; then
     ESSID=$(iwconfig wlan0 | grep ESSID | cut -d: -f2 |  sed 's/.*\"\([^\"]*\)".*/\1/')
 
-    if [ -z $ESSID ]; then
+    if [ -z "$ESSID" ]; then
         echo "The wireless interface $DEV is not associated to any access point"
         exit 7
     fi
@@ -81,10 +81,10 @@ fi
 IP=$(ip addr show $DEV | grep 'inet ' | grep -v 127.0.0.1 | sed 's/inet \([0-9.]*\).*/\1/')
 is_dhcp_client_running $DEV && HAS_DHCP='yes' || HAS_DHCP=''
 
-if [ -z $IP ]; then
+if [ -z "$IP" ]; then
     echo "No IP address assigned to this computer."
 
-    if [ -z $HAS_DHCP ]; then
+    if [ -z "$HAS_DHCP" ]; then
         echo -e "\tA DHCP daemon is running, however."
     fi
 fi
@@ -97,7 +97,7 @@ else
 fi
 
 GW=$(ip route show | grep 'default via' | sed 's/default via \([0-9.]*\).*/\1/')
-if [ -z $GW ]; then
+if [ -z "$GW" ]; then
     echo "No default gateway specified."
     exit 1
 fi
@@ -126,7 +126,7 @@ RES=$(host $TEST_HOST)
 if [ $? -ne 0 ]; then
     NS=$(cat /etc/resolv.conf | grep '^nameserver')
 
-    if [ $NS == ""]; then
+    if [ -z "$NS" ]; then
         echo "There are no nameservers specified in /etc/resolv.conf!"
         exit 4
     fi
