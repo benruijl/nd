@@ -54,8 +54,14 @@ function is_dhcp_client_running() {
 	# Nothing found?
 	[[ -z "$dhcp_pid" ]] && return 1
 	# We found something, see if it's for this interface
-	grep -qF "$_interface" /proc/$dhcp_pid/cmdline
-	return $?
+	# there could be multiple processes too, so loop through
+	# whatever we found in $dhcp_pid
+	for pid in $dhcp_pid ; do
+		grep -qF "$_interface" /proc/$pid/cmdline && return 0
+	done
+	# If we get here, we haven't found anything so
+	# assume we're not using dhcp
+	return 1
 }
 
 DEV="$1"
