@@ -74,7 +74,7 @@ is_interface_up $DEV && echo "* Interface is UP" || { echo "$DEV is DOWN"; exit 
 
 # Is it a wireless device?
 if [ -d "/sys/class/net/$DEV/wireless" ]; then
-    ESSID=$(iwconfig wlan0 | grep ESSID | cut -d: -f2 |  sed 's/.*\"\([^\"]*\)".*/\1/')
+    ESSID=$(iwconfig $DEV | grep ESSID | cut -d: -f2 |  sed 's/.*\"\([^\"]*\)".*/\1/')
 
     if [ -z "$ESSID" ]; then
         echo "The wireless interface $DEV is not associated to any access point"
